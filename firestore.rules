@@ -1,0 +1,54 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function signedIn() { return request.auth != null; }
+    function isKid(uid) { return signedIn() && request.auth.uid == uid; }
+    function isParentOf(uid) {
+      return signedIn()
+        && request.auth.token.email != null
+        && request.auth.token.email.lower() in get(/databases/$(database)/documents/kids/$(uid)).data.parentEmails;
+    }
+
+    // How a parent finds their student: the student's laptop writes
+    // parents/{parent email}/kids/{student uid}. Only that parent can read it.
+    // It grants nothing by itself: reading the student still needs the email
+    // in the student's own parentEmails (checked below).
+    match /parents/{email}/kids/{kid} {
+      allow read: if signedIn() && request.auth.token.email != null
+        && request.auth.token.email.lower() == email;
+      allow create, update, delete: if signedIn() && request.auth.uid == kid;
+    }
+
+    // One document per student. The student owns it. A parent listed in parentEmails can read it.
+    match /kids/{uid} {
+      allow read: if isKid(uid)
+        || (signedIn() && request.auth.token.email != null
+            && request.auth.token.email.lower() in resource.data.parentEmails);
+      allow create, update: if isKid(uid);
+      allow delete: if false;
+
+      // Parent rules: only a parent writes them, the student's laptop reads them.
+      match /rules/{id} {
+        allow read: if isKid(uid) || isParentOf(uid);
+        allow write: if isParentOf(uid);
+      }
+      // One-off orders (close tabs, message, add a task from the website).
+      match /commands/{id} {
+        allow read, create, update: if isKid(uid) || isParentOf(uid);
+        allow delete: if isParentOf(uid);
+      }
+      // Parent talks to the tutor AI. Parent writes the message, the laptop writes the reply.
+      match /parentChat/{id} {
+        allow read, update: if isKid(uid) || isParentOf(uid);
+        allow create, delete: if isParentOf(uid);
+      }
+      // "Can I open YouTube?" The laptop asks, the parent answers.
+      match /requests/{id} {
+        allow read, update: if isKid(uid) || isParentOf(uid);
+        allow create: if isKid(uid);
+        allow delete: if isParentOf(uid);
+      }
+    }
+  }
+}

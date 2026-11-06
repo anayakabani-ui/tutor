@@ -1,0 +1,397 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tutor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Google+Sans+Flex:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* Same design system as the desktop app (main.py): keep these values in step. */
+:root{--bg:#f4f5f7;--card:#fff;--ink:#1c1d22;--mute:#71747d;--accent:#2f6bff;--accent-dark:#1f55e0;--tint:#f1f5ff;--soft:#e9ebf0;--bad:#e5484d;--good:#2f9e6e;
+  --shadow:0 6px 28px rgba(20,30,60,.10);--ease:.18s ease}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:400 16px/1.5 "Google Sans Flex","Google Sans","Segoe UI",system-ui,sans-serif}
+main{max-width:720px;margin:0 auto;padding:22px 16px 96px}
+h1{font-size:22px;font-weight:700;margin:0}
+h2{font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--mute);margin:30px 4px 10px}
+.mute{color:var(--mute);font-size:14px}
+.card{background:var(--card);border-radius:18px;padding:18px;margin:12px 0;box-shadow:var(--shadow)}
+input,select,button,textarea{font:inherit;color:inherit}
+input,select,textarea{width:100%;padding:11px 14px;border:2px solid transparent;border-radius:12px;background:var(--bg);margin:5px 0;outline:none;transition:border-color var(--ease),background var(--ease)}
+input:hover,select:hover,textarea:hover{border-color:var(--soft)}
+input:focus,select:focus,textarea:focus{border-color:var(--accent);background:#fff}
+button{padding:10px 16px;border:none;border-radius:12px;background:var(--soft);font-weight:500;cursor:pointer;transition:background var(--ease),transform var(--ease),box-shadow var(--ease),color var(--ease)}
+button:hover{background:#dde1e8}
+button:active{transform:scale(.97)}
+button.main{background:var(--accent);color:#fff;font-weight:600}
+button.main:hover{background:var(--accent-dark);box-shadow:0 6px 16px rgba(47,107,255,.3)}
+button.danger{background:#fdecec;color:var(--bad);font-weight:700}
+button.danger:hover{background:var(--bad);color:#fff}
+button.small{padding:6px 12px;font-size:14px}
+button.fab{flex:0 0 46px;width:46px;height:46px;border-radius:50%;padding:0;font-size:26px;line-height:1}
+.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}.row>*{flex:1;min-width:0}.row>button{flex:0 0 auto}
+.tabs{display:flex;gap:4px;margin:18px 0 6px;overflow-x:auto}
+.tabs button{background:none;color:var(--mute);font-weight:600;padding:8px 14px;white-space:nowrap}
+.tabs button:hover{background:var(--soft);color:var(--ink)}
+.tabs button.on{background:var(--card);color:var(--ink);box-shadow:0 2px 10px rgba(20,30,60,.07)}
+.sec{font-size:12px;font-weight:700;letter-spacing:.08em;color:var(--mute);margin:14px 10px 4px}.sec:first-child{margin-top:2px}
+.task{display:flex;gap:12px;align-items:flex-start;padding:11px 10px;border-radius:12px;cursor:pointer;transition:background var(--ease),transform var(--ease)}
+.task:hover{background:var(--tint);transform:translateX(2px)}
+.task input{appearance:none;-webkit-appearance:none;width:22px;height:22px;flex:0 0 22px;margin:1px 0 0;padding:0;border:2px solid #c3c8d2;border-radius:50%;background:#fff;cursor:pointer;transition:all var(--ease)}
+.task input:hover{border-color:var(--accent)}
+.task input:checked{background:var(--accent);border-color:var(--accent);box-shadow:inset 0 0 0 3px #fff}
+.task.done span{text-decoration:line-through;color:var(--mute)}
+.line{display:flex;justify-content:space-between;gap:10px;padding:9px 10px;border-radius:10px;font-size:15px;transition:background var(--ease)}
+.line:hover{background:var(--tint)}
+.line span:last-child{color:var(--mute);white-space:nowrap}
+.pill{display:inline-block;padding:2px 9px;border-radius:99px;font-size:12px;font-weight:600;background:var(--soft)}
+.pill.block{background:#fdecec;color:#a12727}.pill.allow{background:#e3f4ec;color:#1d6b49}
+#mail{position:fixed;right:16px;bottom:16px;max-width:320px;background:#fff;border-radius:18px;padding:14px 16px;box-shadow:0 10px 40px rgba(20,30,60,.18);display:none;cursor:pointer}
+.ring{display:flex;gap:22px;align-items:center;flex-wrap:wrap}
+.err{color:var(--bad);min-height:20px}
+.hide{display:none!important}
+.bubble{background:var(--bg);border-radius:14px;padding:10px 14px;margin:8px 0}.bubble.me{background:var(--tint);margin-left:14%}
+label{display:block;font-size:13px;font-weight:600;color:var(--mute);margin-top:8px}
+label.task{font-size:16px;font-weight:400;color:var(--ink);margin:0}
+label.check{display:flex;gap:10px;align-items:center;font-size:14px;font-weight:500;color:var(--ink);margin:8px 0;cursor:pointer}
+label.check input{appearance:none;-webkit-appearance:none;width:20px;height:20px;flex:0 0 20px;margin:0;padding:0;border:2px solid #c3c8d2;border-radius:6px;background:#fff;cursor:pointer;transition:all var(--ease)}
+label.check input:hover{border-color:var(--accent)}
+label.check input:checked{background:var(--accent);border-color:var(--accent);box-shadow:inset 0 0 0 3px #fff}
+#confetti{position:fixed;inset:0;pointer-events:none;z-index:9}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<main>
+  <div class="row" style="justify-content:space-between">
+    <div class="row" style="flex:1"><svg id="face" width="44" height="44" viewBox="0 0 100 100" style="flex:0 0 44px"></svg><div><h1 id="title">Tutor</h1><div class="mute" id="sub"></div></div></div>
+    <button id="out" class="small hide">Sign out</button>
+  </div>
+
+  <section id="v-login" class="card hide">
+    <h2 style="margin-top:0">Sign in</h2>
+    <input id="email" type="email" placeholder="Email" autocomplete="username">
+    <input id="pw" type="password" placeholder="Password" autocomplete="current-password">
+    <div class="err" id="loginErr"></div>
+    <button class="main" id="go">Sign in</button>
+  </section>
+
+  <section id="v-none" class="card hide">
+    <p><b>Nothing to show yet.</b></p>
+    <p class="mute">If you're the student: open the tutor on your laptop and sign in there first.<br>
+    If you're a parent: ask the student to add your email in the tutor's Settings, under Parent.</p>
+  </section>
+
+  <section id="v-app" class="hide">
+    <div id="kidPick" class="hide"><select id="kids"></select></div>
+    <div class="tabs" id="tabs"></div>
+
+    <div id="t-today" class="hide">
+      <div class="card"><div id="tasks"></div>
+        <div class="row" style="margin-top:12px"><input id="newTask" placeholder="Add a task.  End with @friday for a date"><button id="addTask" class="main fab" title="Add it">+</button></div>
+        <div class="mute">New tasks and ticks reach the laptop within about 20 seconds while it's on.</div></div>
+      <h2>Later</h2><div class="card" id="later"></div>
+      <h2>Weakest subject this week</h2><div class="card" id="weak"></div>
+      <h2>School</h2><div class="card" id="school"></div>
+    </div>
+
+    <div id="t-watch" class="hide">
+      <div class="card" id="statusCard"></div>
+      <div id="requests"></div>
+      <h2>Do something now</h2>
+      <div class="card">
+        <div class="row"><input id="closeSite" placeholder="e.g. youtube"><button id="closeNow" class="danger">Close tabs now</button></div>
+        <input id="instead" placeholder="What to do instead (optional)">
+        <div class="row"><input id="msg" placeholder="Message for them"><button id="sendMsg">Send</button></div>
+      </div>
+      <h2>Rules</h2>
+      <div class="card">
+        <div class="row">
+          <select id="rType"><option value="block_site">Block a site</option><option value="ban_channel">Ban YouTube channel or words</option><option value="approve_youtube">Ask me before YouTube opens</option></select>
+          <input id="rTarget" placeholder="e.g. tiktok">
+        </div>
+        <div class="row">
+          <select id="rWhen"><option value="60">For 1 hour</option><option value="180">For 3 hours</option><option value="tasks">Until today's tasks are done</option><option value="repeat">Every day between...</option><option value="forever">Until I remove it</option></select>
+          <input id="rFrom" placeholder="from 4pm" class="hide"><input id="rTo" placeholder="to 7pm" class="hide">
+        </div>
+        <label class="check"><input type="checkbox" id="rBlack"> Black out the screen instead of just closing the tab</label>
+        <input id="rInstead" placeholder="What to do instead (optional)">
+        <button class="main" id="addRule">Add rule</button>
+        <div id="rules" style="margin-top:10px"></div>
+      </div>
+      <h2>Ask the tutor</h2>
+      <div class="card"><div id="pchat"></div>
+        <div class="row"><input id="pmsg" placeholder="e.g. how did today go?"><button id="psend" class="main">Send</button></div>
+        <div class="mute">The laptop answers, so it needs to be on. Rules it suggests show here with an Apply button.</div></div>
+    </div>
+
+    <div id="t-time" class="hide">
+      <div class="card"><div class="ring"><svg id="ring" width="190" height="190" viewBox="0 0 200 200"></svg>
+        <div><div class="row"><button id="bUseful" class="small">Useful time</button><button id="bWasted" class="small">Wasted time</button></div><div id="ringList" style="margin-top:10px;min-width:210px"></div></div></div></div>
+      <h2>YouTube today</h2><div class="card" id="yt"></div>
+      <h2>Google searches today</h2><div class="card" id="searches"></div>
+    </div>
+
+    <div id="t-tutor" class="hide">
+      <div class="card">
+        <label>Name<input id="tName"></label>
+        <label>Shape<select id="tShape"><option>circle</option><option>square</option><option>cat</option></select></label>
+        <label>Colour<input id="tColour" type="color" style="height:44px"></label>
+        <label>Personality<input id="tPers" list="pers"><datalist id="pers"><option>hype friend</option><option>blunt</option><option>calm</option><option>strict coach</option></datalist></label>
+        <label>Your own rules<textarea id="tRules" rows="2" placeholder="e.g. call me bestie"></textarea></label>
+        <button class="main" id="saveTutor">Save</button> <span class="mute" id="tutorSaved"></span>
+      </div>
+    </div>
+
+    <div id="t-me" class="hide">
+      <div class="card"><div id="who" class="mute"></div>
+        <input id="newPw" type="password" placeholder="New password (6 or more characters)" autocomplete="new-password">
+        <button id="changePw" class="main">Change password</button> <span class="err" id="pwMsg"></span></div>
+    </div>
+  </section>
+</main>
+<div id="mail"></div>
+<canvas id="confetti"></canvas>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script src="firebase-config.js"></script>
+<script>
+const $ = id => document.getElementById(id);
+const esc = s => String(s == null ? "" : s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+// am/pm, never 24 hour: 8:10pm, 4pm
+const t12 = d => { const h = d.getHours(), m = d.getMinutes(); return (h % 12 || 12) + (m ? ":" + String(m).padStart(2, "0") : "") + (h < 12 ? "am" : "pm"); };
+const hm12 = s => { const m = /^(\d{1,2}):(\d{2})$/.exec(s || ""); if (!m) return esc(s); const d = new Date(); d.setHours(+m[1], +m[2]); return t12(d); };
+// "4pm", "4:30 pm", "16:00" -> "16:00" (stored like the laptop stores it)
+const to24 = s => { const m = /^(\d{1,2})(?:[:.](\d{2}))?\s*(am|pm)?$/i.exec((s || "").trim()); if (!m || (!m[2] && !m[3])) return null;
+  let h = +m[1]; const mi = +(m[2] || 0), ap = (m[3] || "").toLowerCase();
+  if (ap) { if (h < 1 || h > 12) return null; h = h % 12 + (ap === "pm" ? 12 : 0); }
+  return h > 23 || mi > 59 ? null : String(h).padStart(2, "0") + ":" + String(mi).padStart(2, "0"); };
+const nday = s => { const d = new Date((s || "") + "T12:00"); return isNaN(d) ? esc(s) : d.toLocaleDateString([], {weekday: "short", day: "numeric", month: "short"}); };
+const cap = s => String(s || "").charAt(0).toUpperCase() + String(s || "").slice(1);
+const mins = s => { s = Math.round((s || 0) / 60); return s >= 60 ? Math.floor(s / 60) + "h " + (s % 60) + "m" : s + "m"; };
+const USEFUL = ["classroom","calendar","gmail","docs","search","tutor","school"];
+const WASTED = ["youtube","tiktok","instagram","netflix","roblox","discord","twitch","snapchat"];
+let db, auth, user, role, kidId, kid = {}, unsub = [], ringMode = "useful", seenMail = null;
+
+function show(id) { ["v-login","v-none","v-app"].forEach(v => $(v).classList.toggle("hide", v !== id)); }
+
+function face(t) {
+  t = t || {}; const c = esc(t.colour || "#ff6fae"); let s;
+  if (t.shape === "square") s = `<rect x="6" y="6" width="88" height="88" rx="18" fill="${c}"/>`;
+  else if (t.shape === "cat") s = `<polygon points="12,50 20,4 42,30" fill="${c}"/><polygon points="88,50 80,4 58,30" fill="${c}"/><ellipse cx="50" cy="59" rx="42" ry="37" fill="${c}"/>`;
+  else s = `<circle cx="50" cy="50" r="45" fill="${c}"/>`;
+  const y = t.shape === "cat" ? 58 : 46;
+  $("face").innerHTML = s + `<ellipse cx="36" cy="${y}" rx="4.5" ry="6" fill="#1c1d22"/><ellipse cx="64" cy="${y}" rx="4.5" ry="6" fill="#22212b"/>`;
+}
+
+function start() {
+  const cfg = window.FIREBASE_CONFIG || {};
+  face();
+  if (!cfg.apiKey || !cfg.projectId) { show("v-none"); $("v-none").innerHTML = "<p><b>This website isn't set up yet.</b></p><p class='mute'>firebase-config.js is empty.</p>"; return; }
+  firebase.initializeApp(cfg); auth = firebase.auth(); db = firebase.firestore();
+  auth.onAuthStateChanged(u => { user = u; u ? enter() : (stop(), $("out").classList.add("hide"), show("v-login")); });
+}
+function stop() { unsub.forEach(f => f()); unsub = []; }
+
+$("go").onclick = () => auth.signInWithEmailAndPassword($("email").value.trim(), $("pw").value)
+  .catch(() => $("loginErr").textContent = "Wrong email or password.");
+$("pw").onkeydown = e => { if (e.key === "Enter") $("go").click(); };
+$("out").onclick = () => auth.signOut();
+
+async function enter() {
+  $("out").classList.remove("hide"); $("who").textContent = "Signed in as " + user.email;
+  const mine = await db.doc("kids/" + user.uid).get().catch(() => null);
+  if (mine && mine.exists) { role = "kid"; return open(user.uid); }
+  // A parent finds their students through parents/{email}/kids, which each student's laptop writes.
+  const links = await db.collection("parents/" + user.email.toLowerCase() + "/kids").get().catch(() => null);
+  const kids = [];
+  for (const l of (links ? links.docs : [])) {
+    const k = await db.doc("kids/" + l.id).get().catch(() => null);
+    if (k && k.exists) kids.push({id: l.id, name: (k.data() || {}).name || l.data().name || "Student"});
+  }
+  if (kids.length) {
+    role = "parent";
+    $("kids").innerHTML = kids.map(k => `<option value="${k.id}">${esc(k.name)}</option>`).join("");
+    $("kidPick").classList.toggle("hide", kids.length < 2);
+    $("kids").onchange = () => open($("kids").value);
+    return open(kids[0].id);
+  }
+  show("v-none");
+}
+
+function open(id) {
+  stop(); kidId = id; show("v-app"); seenMail = null; $("mail").style.display = "none";
+  const tabs = role === "kid" ? [["today","Today"],["time","My time"],["tutor","My tutor"],["me","Account"]]
+                              : [["watch","Now"],["time","Time"],["today","Tasks"],["me","Account"]];
+  $("tabs").innerHTML = tabs.map(t => `<button data-t="${t[0]}">${t[1]}</button>`).join("");
+  $("tabs").querySelectorAll("button").forEach(b => b.onclick = () => tab(b.dataset.t));
+  tab(tabs[0][0]);
+  const ref = db.doc("kids/" + id);
+  unsub.push(ref.onSnapshot(s => { kid = s.data() || {}; draw(); }));
+  if (role === "parent") {
+    unsub.push(ref.collection("rules").onSnapshot(s => drawRules(s.docs)));
+    unsub.push(ref.collection("requests").onSnapshot(s => drawRequests(s.docs)));
+    unsub.push(ref.collection("parentChat").onSnapshot(s => drawChat(s.docs)));
+  }
+}
+function tab(name) {
+  ["today","watch","time","tutor","me"].forEach(t => $("t-" + t).classList.toggle("hide", t !== name));
+  $("tabs").querySelectorAll("button").forEach(b => b.classList.toggle("on", b.dataset.t === name));
+}
+
+function draw() {
+  face(kid.tutor); const t = kid.tutor || {};
+  const who = kid.nickname || kid.name || "";
+  $("title").textContent = role === "kid" ? (t.name || "Tutor") + " and " + who : (kid.name || "Student") + "'s tutor";
+  const age = kid.updated ? Math.round(Date.now() / 1000 - kid.updated) : null;
+  $("sub").textContent = age == null ? "" : age < 90 ? "Laptop is on" : "Laptop last seen " + new Date(kid.updated * 1000).toLocaleDateString([], {weekday: "short"}) + " " + t12(new Date(kid.updated * 1000));
+  const mine = role === "kid";
+  const all = kid.tasks || [], rowOf = x => `<label class="task ${x.done ? "done" : ""}"><input type="checkbox" data-id="${x.id}" ${x.done ? "checked" : ""}><span>${esc(x.text)}</span></label>`;
+  const part = (name, list) => list.length ? `<div class="sec">${name}</div>` + list.map(rowOf).join("") : "";
+  $("tasks").innerHTML = part("TO DO", all.filter(x => !x.daily && !x.done)) + part("DAILY", all.filter(x => x.daily)) + part("DONE", all.filter(x => !x.daily && x.done)) || "<div class='mute'>Nothing on today's list.</div>";
+  $("tasks").querySelectorAll("input").forEach(c => c.onchange = () => {
+    c.parentElement.classList.toggle("done", c.checked);
+    if (c.checked) { const r = c.getBoundingClientRect(); confetti(r.left + r.width / 2, r.top + r.height / 2); }
+    order({type: "tick", id: +c.dataset.id, on: c.checked}); });
+  $("later").innerHTML = (kid.later || []).map(x => `<div class="line"><span>${esc(x.text)}</span><span>${nday(x.due)}</span></div>`).join("") || "<div class='mute'>Nothing later.</div>";
+  const w = kid.weak || {};
+  $("weak").innerHTML = w.subject ? `<b>${esc(w.subject)}</b><ul style="margin:6px 0 0 18px;padding:0">${(w.points || []).map(p => `<li>${esc(p)}</li>`).join("")}</ul>` : "<div class='mute'>Not set this week. The tutor asks for exact points.</div>";
+  $("school").innerHTML = [["Classroom, due soon", kid.classroom], ["Calendar today", kid.calendar]].map(([h, l]) => `<div class="mute">${h}</div>` + ((l || []).map(x => `<div class="line"><span>${esc(x)}</span><span></span></div>`).join("") || "<div class='line'><span>Nothing</span><span></span></div>")).join("");
+  const left = (kid.tasks || []).filter(x => !x.done && !x.daily).length;
+  const ytNow = (kid.youtube || []).slice(-1)[0];
+  const watching = ytNow && Date.now() / 1000 - (ytNow.started + ytNow.seconds) < 60;
+  $("statusCard").innerHTML = `<b>${left} task${left === 1 ? "" : "s"} left today</b><div class="mute">${kid.in_school ? "School time. " : ""}${kid.free_until ? "Free watching until " + esc(kid.free_until) + ". " : ""}${watching ? "YouTube open right now: " + esc(ytNow.title) : "No YouTube open."}</div>`;
+  $("yt").innerHTML = (kid.youtube || []).slice().reverse().map(y => `<div class="line"><span>${esc(y.title)} <span class="pill ${y.verdict === "allow" ? "allow" : "block"}">${y.verdict === "allow" ? "watched" : "closed"}</span></span><span>${t12(new Date(y.started * 1000))} · ${mins(y.seconds)}</span></div>`).join("") || "<div class='mute'>None today.</div>";
+  $("searches").innerHTML = (kid.searches || []).slice().reverse().map(q => `<div class="line"><span>${esc(q)}</span><span></span></div>`).join("") || "<div class='mute'>None today.</div>";
+  drawRing();
+  if (mine && document.activeElement.closest && !document.activeElement.closest("#t-tutor")) {
+    $("tName").value = t.name || ""; $("tShape").value = t.shape || "circle"; $("tColour").value = /^#[0-9a-f]{6}$/i.test(t.colour || "") ? t.colour : "#ff6fae"; $("tPers").value = t.personality || ""; $("tRules").value = t.rules || "";
+  }
+  if (mine) newMail(kid.emails || []);
+}
+
+function newMail(list) {
+  const keys = list.map(m => m.from + "|" + m.subject);
+  if (seenMail === null) { seenMail = keys; return; }
+  const fresh = list.filter(m => !seenMail.includes(m.from + "|" + m.subject));
+  seenMail = keys;
+  if (!fresh.length) return;
+  $("mail").innerHTML = `<b>New email${fresh.length > 1 ? " (" + fresh.length + ")" : ""}</b><br>${esc(fresh[0].from)}<br><span class="mute">${esc(fresh[0].subject)}</span>`;
+  $("mail").style.display = "block"; $("mail").onclick = () => $("mail").style.display = "none";
+  setTimeout(() => $("mail").style.display = "none", 12000);
+}
+
+function drawRing() {
+  const use = kid.usage || {}, set = ringMode === "useful" ? USEFUL : WASTED;
+  const rows = Object.entries(use).filter(([k]) => set.includes(k)).sort((a, b) => b[1] - a[1]);
+  const total = rows.reduce((n, r) => n + r[1], 0), all = Object.values(use).reduce((n, v) => n + v, 0);
+  const R = 80, C = 2 * Math.PI * R, col = ringMode === "useful" ? "#2f9e6e" : "#e5484d";
+  const frac = all ? total / all : 0;
+  $("ring").innerHTML = `<circle cx="100" cy="100" r="${R}" fill="none" stroke="#e9ebf0" stroke-width="18"/>
+    <circle cx="100" cy="100" r="${R}" fill="none" stroke="${col}" stroke-width="18" stroke-linecap="round" stroke-dasharray="${C * frac} ${C}" transform="rotate(-90 100 100)"/>
+    <text x="100" y="98" text-anchor="middle" font-size="30" font-weight="600" fill="#22212b">${mins(total)}</text>
+    <text x="100" y="122" text-anchor="middle" font-size="13" fill="#6b6875">${ringMode} of ${mins(all)}</text>`;
+  $("bUseful").classList.toggle("main", ringMode === "useful"); $("bWasted").classList.toggle("main", ringMode === "wasted");
+  $("ringList").innerHTML = rows.map(([k, v]) => `<div class="line"><span>${esc(cap(k))}</span><span>${mins(v)}</span></div>`).join("") || "<div class='mute'>None today.</div>";
+}
+$("bUseful").onclick = () => { ringMode = "useful"; drawRing(); };
+$("bWasted").onclick = () => { ringMode = "wasted"; drawRing(); };
+
+const order = o => db.collection("kids/" + kidId + "/commands").add(Object.assign({done: false, at: Date.now() / 1000}, o));
+$("addTask").onclick = () => { let t = $("newTask").value.trim(), due = ""; if (!t) return;
+  const i = t.lastIndexOf("@"); if (i > 0) { due = t.slice(i + 1).trim(); t = t.slice(0, i).trim(); }
+  order({type: "add_task", text: t, due: due}); $("newTask").value = ""; };
+
+// A quick burst when a task gets ticked. Same colours as the desktop app.
+let bits = [], raf = 0;
+function confetti(x, y) {
+  if (matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  const cv = $("confetti"); cv.width = innerWidth; cv.height = innerHeight;
+  const cols = ["#2f6bff", "#ff6fae", "#ffc53d", "#2f9e6e", "#9b6bff", "#ff8a3d"];
+  for (let i = 0; i < 70; i++) bits.push({x: x, y: y, vx: Math.random() * 11 - 5.5, vy: -(Math.random() * 7 + 2.5), a: Math.random() * 6.3, s: Math.random() * .5 - .25, w: 5 + Math.random() * 4, h: 8 + Math.random() * 5, c: cols[i % cols.length], life: 1});
+  if (!raf) raf = requestAnimationFrame(frame);
+}
+function frame() {
+  const cv = $("confetti"), g = cv.getContext("2d"); g.clearRect(0, 0, cv.width, cv.height);
+  bits.forEach(b => { b.vy += .32; b.vx *= .99; b.x += b.vx; b.y += b.vy; b.a += b.s; b.life -= .011;
+    g.save(); g.globalAlpha = Math.max(0, Math.min(1, b.life * 1.6)); g.translate(b.x, b.y); g.rotate(b.a); g.fillStyle = b.c; g.fillRect(-b.w / 2, -b.h / 2, b.w, b.h); g.restore(); });
+  bits = bits.filter(b => b.life > 0 && b.y < cv.height + 20);
+  raf = bits.length ? requestAnimationFrame(frame) : 0;
+}
+$("newTask").onkeydown = e => { if (e.key === "Enter") $("addTask").click(); };
+
+$("saveTutor").onclick = () => db.doc("kids/" + kidId).update({
+  tutor: {name: $("tName").value.trim() || "Tutor", shape: $("tShape").value, colour: $("tColour").value, personality: $("tPers").value.trim() || "hype friend", rules: $("tRules").value.trim()},
+  tutor_at: Date.now() / 1000 }).then(() => { $("tutorSaved").textContent = "Saved. Your laptop picks it up in about 20 seconds."; });
+
+$("changePw").onclick = () => { const p = $("newPw").value; $("pwMsg").style.color = "";
+  if (p.length < 6) { $("pwMsg").textContent = "6 or more characters."; return; }
+  user.updatePassword(p).then(() => { $("pwMsg").style.color = "#2f9e6e"; $("pwMsg").textContent = "Changed."; $("newPw").value = ""; })
+    .catch(e => $("pwMsg").textContent = e.code === "auth/requires-recent-login" ? "Sign out, sign in again, then change it." : "That didn't work."); };
+
+// ---- parent
+$("closeNow").onclick = () => { const s = $("closeSite").value.trim(); if (!s) return; order({type: "close_now", target: s, instead: $("instead").value.trim()}); $("closeSite").value = ""; };
+$("sendMsg").onclick = () => { const s = $("msg").value.trim(); if (!s) return; order({type: "message", text: s}); $("msg").value = ""; };
+$("rWhen").onchange = () => ["rFrom","rTo"].forEach(i => $(i).classList.toggle("hide", $("rWhen").value !== "repeat"));
+$("rType").onchange = () => $("rTarget").classList.toggle("hide", $("rType").value === "approve_youtube");
+
+function ruleFrom(type, target, when, from, to, black, instead) {
+  const r = {type: type, target: type === "approve_youtube" ? "youtube" : target.toLowerCase(), made: Date.now() / 1000};
+  if (when === "tasks") r.until_tasks_done = true;
+  else if (when === "repeat") r.repeat = {from: from || "00:00", to: to || "23:59"};
+  else if (when === "forever") r.until = "forever";
+  else r.until = Date.now() / 1000 + (+when) * 60;
+  if (black) r.black = true; if (instead) r.instead = instead;
+  return r;
+}
+$("addRule").onclick = () => {
+  const type = $("rType").value, target = $("rTarget").value.trim();
+  if (type !== "approve_youtube" && !target) return;
+  let from = "", to = "";
+  if ($("rWhen").value === "repeat") {
+    from = to24($("rFrom").value); to = to24($("rTo").value);
+    if (!from || !to) { $("rFrom").focus(); $("rFrom").placeholder = "a time like 4pm"; $("rFrom").value = from ? $("rFrom").value : ""; $("rTo").value = to ? $("rTo").value : ""; return; }
+  }
+  db.collection("kids/" + kidId + "/rules").add(ruleFrom(type, target, $("rWhen").value, from, to, $("rBlack").checked, $("rInstead").value.trim()));
+  $("rBlack").checked = false;
+  $("rTarget").value = $("rInstead").value = "";
+};
+function ruleText(r) {
+  const what = r.type === "approve_youtube" ? "Ask me before YouTube" : (r.type === "ban_channel" ? "Ban on YouTube: " : "Block ") + (r.type === "approve_youtube" ? "" : esc(r.target));
+  const when = r.until_tasks_done ? "until tasks are done" : r.repeat ? "every day " + hm12(r.repeat.from) + " to " + hm12(r.repeat.to) + (r.repeat.days ? " (" + esc(r.repeat.days.join(", ")) + ")" : "") : r.until === "forever" || r.until == null ? "until removed" : (r.until * 1000 < Date.now() ? "finished" : "until " + t12(new Date(r.until * 1000)));
+  return what + ", " + when + (r.black ? ", black screen" : "") + (r.instead ? ". Instead: " + esc(r.instead) : "");
+}
+function drawRules(docs) {
+  $("rules").innerHTML = docs.map(d => `<div class="line"><span>${ruleText(d.data())}</span><span><button class="small" data-id="${d.id}">Remove</button></span></div>`).join("") || "<div class='mute'>No rules.</div>";
+  $("rules").querySelectorAll("button").forEach(b => b.onclick = () => db.doc("kids/" + kidId + "/rules/" + b.dataset.id).delete());
+}
+function drawRequests(docs) {
+  const open = docs.filter(d => !d.data().answer && Date.now() / 1000 - d.data().at < 1800);
+  $("requests").innerHTML = open.map(d => `<div class="card"><b>Wants to open YouTube</b><div class="mute">${esc(d.data().title || "")}</div><div class="row" style="margin-top:8px"><button class="main" data-id="${d.id}" data-a="yes">Yes, for an hour</button><button data-id="${d.id}" data-a="no">No</button></div></div>`).join("");
+  $("requests").querySelectorAll("button").forEach(b => b.onclick = () => db.doc("kids/" + kidId + "/requests/" + b.dataset.id).update({answer: b.dataset.a}));
+}
+function drawChat(docs) {
+  const list = docs.map(d => Object.assign({id: d.id}, d.data())).sort((a, b) => a.at - b.at).slice(-12);
+  $("pchat").innerHTML = list.map(m => `<div class="bubble me">${esc(m.text)}</div>` + (m.reply ? `<div class="bubble">${esc(m.reply)}${(m.rules || []).length && !m.applied ? `<div style="margin-top:6px">${m.rules.map(r => "<div class='mute'>" + (r.type === "message" ? "Tell them: " + esc(r.text) : r.type === "close_now" ? "Close " + esc(r.target) + " now" : r.type === "remove" ? "Remove rules about " + esc(r.target) : ruleText(r)) + "</div>").join("")}<button class="small main" data-id="${m.id}" style="margin-top:6px">Apply</button></div>` : ""}${m.applied ? "<div class='mute'>Applied.</div>" : ""}</div>` : `<div class="mute">Waiting for the laptop...</div>`)).join("");
+  $("pchat").querySelectorAll("button").forEach(b => b.onclick = () => applyRules(list.find(m => m.id === b.dataset.id)));
+}
+async function applyRules(m) {
+  const base = "kids/" + kidId;
+  for (const r of m.rules || []) {
+    if (r.type === "message" || r.type === "close_now") await order(r);
+    else if (r.type === "remove") { const s = await db.collection(base + "/rules").get(); for (const d of s.docs) if ((d.data().target || "").includes((r.target || "").toLowerCase())) await d.ref.delete(); }
+    else await db.collection(base + "/rules").add(Object.assign({made: Date.now() / 1000}, r));
+  }
+  await db.doc(base + "/parentChat/" + m.id).update({applied: true});
+}
+$("psend").onclick = () => { const t = $("pmsg").value.trim(); if (!t) return; db.collection("kids/" + kidId + "/parentChat").add({text: t, at: Date.now() / 1000, reply: ""}); $("pmsg").value = ""; };
+$("pmsg").onkeydown = e => { if (e.key === "Enter") $("psend").click(); };
+
+start();
+</script>
+</body>
+</html>
